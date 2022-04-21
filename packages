@@ -1,3 +1,22 @@
 idomenu
 (global-set-key (kbd "C-c f") 'idomenu)
 
+ivy-mode
+  ignore backup files
+  same keybindings as ido - ?
+  enter on directory should complete, not pull up dired
+
+which-key
+  
+python
+  lsp-mode
+	jedi-language-server - lsp-jedi
+	flycheck
+	company
+	lsp-ui
+
+  virtualenv
+    pyvenv-mode
+	auto-virtualenv or pyenv-mode-auto
+
+  dap-mode?

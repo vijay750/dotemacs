@@ -146,10 +146,56 @@
 (require 'which-func)
 (require 'imenu)
 
+;; use-package didn't work, had to install via packages-list from elpa. melpa is old?
+(use-package which-key
+  :init (which-key-mode)
+  :diminish which-key-mode
+  :config
+  (setq which-key-idle-delay 1))
+
+(use-package ivy-rich
+  :init
+  (ivy-rich-mode 1))
+
+(use-package counsel
+  :bind (("M-x" . counsel-M-x)
+         ("C-x b" . counsel-ibuffer)
+         ("C-x C-f" . counsel-find-file)
+         :map minibuffer-local-map
+         ("C-r" . 'counsel-minibuffer-history)))
+
+(use-package helpful
+  :custom
+  (counsel-describe-function-function #'helpful-callable)
+  (counsel-describe-variable-function #'helpful-variable)
+  :bind
+  ([remap describe-function] . counsel-describe-function)
+  ([remap describe-command] . helpful-command)
+  ([remap describe-variable] . counsel-describe-variable)
+  ([remap describe-key] . helpful-key))
+
+(use-package projectile
+  :diminish projectile-mode
+  :config (projectile-mode)
+  :custom ((projectile-completion-system 'ivy))
+  :bind-keymap
+  ("C-c @ p" . projectile-command-map)
+  ;; NOTE: Set this to the folder where you keep your Git repos!
+  ;;(when (file-directory-p "~/Projects/Code")
+    ;;(setq projectile-project-search-path '("~/Projects/Code")))
+  ;;(setq projectile-switch-project-action #'projectile-dired)
+  )
+
+(use-package magit
+  :config
+  (define-key magit-status-mode-map (kbd "C-<tab>") nil)
+  (define-key magit-diff-mode-map (kbd "C-<tab>") nil)
+  (global-set-key (kbd "C-c @ c") 'magit-status)
+  )
+
 
 ;;; look-n-feel
 (set-face-background 'default "WhiteSmoke")
-;;(set-face-background 'default "antiquewhite")
 (set-face-foreground 'default "black")
 (set-face-foreground 'italic "red")
 (set-face-foreground 'bold "black")
@@ -172,29 +218,11 @@
 (set-face-background 'font-lock-constant-face "grey40")
 (make-face-bold 'font-lock-constant-face)
 (set-face-underline-p 'font-lock-string-face nil)
-;;(set-face-background 'mode-line "#babdb6")
-;;(set-face-foreground 'mode-line "black")
 (set-face-foreground 'highlight "gold")
 (set-face-background 'highlight "royalblue")
-;;(set-face-foreground 'text-cursor "black")
-;;(set-face-background 'text-cursor "firebrick")
-;;(set-face-foreground 'modeline-mousable "red")
-;;(set-face-foreground 'modeline-buffer-id "blue")
-;; (set-face-foreground 'widget-documentation "red")
-;; (set-face-foreground 'hyperlink "gold")
-;; (set-face-foreground (gdb-arrow-face) "black")
-;; (set-face-background (gdb-arrow-face) "paleturquoise")
-;; (set-face-foreground 'isearch "black")
-;; (set-face-background 'isearch "cyan")
 (set-face-foreground 'font-lock-builtin-face "darkgreen")
 (make-face-bold 'font-lock-builtin-face)
 
-
-(use-package magit
-  :config
-  (define-key magit-status-mode-map (kbd "C-<tab>") nil)
-  (global-set-key (kbd "C-c @ c") 'magit-status)
-  )
 
 ;;; customized via custom
 (custom-set-variables
