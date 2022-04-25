@@ -132,6 +132,8 @@
 ;; Make `C-x C-m' and `C-x RET' be different (since I tend to type
 ;; the latter by accident sometimes.)
 (define-key global-map [(control x) return] nil)
+;; scroll more on mouse
+(setq mouse-wheel-scroll-amount-horizontal 4)
 
 ;;; packages
 (use-package ivy
@@ -175,7 +177,7 @@
   ([remap describe-key] . helpful-key))
 
 (use-package projectile
-  :diminish projectile-mode
+  :diminish
   :config (projectile-mode)
   :custom ((projectile-completion-system 'ivy))
   :bind-keymap
@@ -192,6 +194,60 @@
   (define-key magit-diff-mode-map (kbd "C-<tab>") nil)
   (global-set-key (kbd "C-c @ c") 'magit-status)
   )
+
+;;; python
+;; language-server
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :hook (lsp-mode . (lambda ()
+					  (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+					  (lsp-headerline-breadcrumb-mode)))
+  :init
+  (setq lsp-keymap-prefix "C-c l")
+  :config
+  (lsp-enable-which-key-integration t))
+
+(use-package lsp-ui
+  :hook (lsp-mode . lsp-ui-mode)
+  :custom
+  (lsp-ui-doc-position 'bottom))
+
+(use-package lsp-jedi
+  :config
+  (add-to-list 'lsp-enabled-clients 'jedi))
+
+(use-package lsp-ivy)
+
+(use-package pyvenv
+  :config
+  (pyvenv-mode t)
+  (setq pyvenv-workon "~/try/py")  ; Default venv
+  (pyvenv-tracking-mode 1)
+  (setq pyvenv-post-activate-hooks
+		(list
+		 (lambda ()
+		   (setq lsp-jedi-executable-command
+				 (concat (projectile-project-root) "/"
+						 pyvenv-workon "/bin/jedi-language-server")))
+		 (lambda ()
+		   (setq python-shell-interpreter
+				 (concat ((projectile-project-root) "/" pyvenv-workon "/bin/python"))))))
+  )
+
+
+(use-package company
+  :after lsp-mode
+  :hook (lsp-mode . company-mode)
+  :bind (:map company-active-map
+         ("<tab>" . company-complete-selection))
+        (:map lsp-mode-map
+         ("<tab>" . company-indent-or-complete-common))
+  :custom
+  (company-minimum-prefix-length 3)
+  (company-idle-delay 0.1))
+
+(use-package company-box
+  :hook (company-mode . company-box-mode))
 
 
 ;;; look-n-feel
@@ -275,5 +331,10 @@
   "Map the return key with `newline-and-indent'"
   (local-set-key (kbd "RET") 'newline-and-indent))
 (add-hook 'python-mode-hook 'set-newline-and-indent)
+(add-hook 'python-mode-hook 'lsp-deferred)
+(add-hook 'python-mode-hook (lambda ()
+							  (setq lsp-jedi-executable-command
+									(concat (projectile-project-root) "/"
+											pyvenv-workon "/bin/jedi-language-server"))))
 
 (which-function-mode 1)
