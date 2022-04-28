@@ -9,6 +9,7 @@
       inhibit-read-only nil
       mouse-yank-at-point t
       password-cache-expiry nil
+	  vr:venv-root nil
       )
 (scroll-bar-mode)
 (menu-bar-mode)
@@ -178,13 +179,13 @@
 
 (use-package projectile
   :diminish
+  :commands (projectile-project-root)
   :config (projectile-mode)
   :custom ((projectile-completion-system 'ivy))
   :bind-keymap
   ("C-c @ p" . projectile-command-map)
-  ;; NOTE: Set this to the folder where you keep your Git repos!
-  ;;(when (file-directory-p "~/Projects/Code")
-    ;;(setq projectile-project-search-path '("~/Projects/Code")))
+  :init
+   (setq projectile-project-search-path '("~/dev/leankloud"))
   ;;(setq projectile-switch-project-action #'projectile-dired)
   )
 
@@ -221,17 +222,7 @@
 (use-package pyvenv
   :config
   (pyvenv-mode t)
-  (setq pyvenv-workon "~/try/py")  ; Default venv
   (pyvenv-tracking-mode 1)
-  (setq pyvenv-post-activate-hooks
-		(list
-		 (lambda ()
-		   (setq lsp-jedi-executable-command
-				 (concat (projectile-project-root) "/"
-						 pyvenv-workon "/bin/jedi-language-server")))
-		 (lambda ()
-		   (setq python-shell-interpreter
-				 (concat ((projectile-project-root) "/" pyvenv-workon "/bin/python"))))))
   )
 
 
@@ -334,7 +325,7 @@
 (add-hook 'python-mode-hook 'lsp-deferred)
 (add-hook 'python-mode-hook (lambda ()
 							  (setq lsp-jedi-executable-command
-									(concat (projectile-project-root) "/"
-											pyvenv-workon "/bin/jedi-language-server"))))
+									(concat (projectile-project-root)
+											vr:venv-root "/bin/jedi-language-server"))))
 
 (which-function-mode 1)

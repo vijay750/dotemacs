@@ -5,15 +5,20 @@ ivy-mode
   ignore backup files
   same keybindings as ido - ?
   enter on directory should complete, not pull up dired
-
-which-key
+  C-x b switch to previous buffer
+  C-x b open buffer if it's visible in another window
   
+which-key
+
+smoother scrolling
+
 python
   lsp-mode
 	jedi-language-server - lsp-jedi
 	flycheck
 	company
 	lsp-ui
+	flake8
 
   virtualenv
     pyvenv-mode
