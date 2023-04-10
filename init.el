@@ -100,7 +100,7 @@
 (define-key Buffer-menu-mode-map " " 'Buffer-menu-select)
 (define-key ctl-x-map "\^b" 'buffer-menu)
 (define-key esc-map "s" 'query-replace-regexp)
-(define-key esc-map "z" 'my-compile-command)
+;; (define-key esc-map "z" 'my-compile-command)
 (define-key esc-map " " 'delete-horizontal-space)
 (define-key esc-map "$" 'ispell-word)
 (define-key esc-map "#" 'ispell-region)
@@ -321,11 +321,20 @@
 (defun set-newline-and-indent ()
   "Map the return key with `newline-and-indent'"
   (local-set-key (kbd "RET") 'newline-and-indent))
-(add-hook 'python-mode-hook 'set-newline-and-indent)
-(add-hook 'python-mode-hook 'lsp-deferred)
-(add-hook 'python-mode-hook (lambda ()
-							  (setq lsp-jedi-executable-command
-									(concat (projectile-project-root)
-											vr:venv-root "/bin/jedi-language-server"))))
+
+;; make python mode hook use local vars
+;; https://stackoverflow.com/questions/19697453/
+(defun my-python-mode-hook ()
+  (set-newline-and-indent)
+  (setq lsp-jedi-executable-command
+		(concat (projectile-project-root)
+				vr:venv-root "/bin/jedi-language-server"))
+  (lsp-deferred))
+
+
+(defun my-local-vars-hook ()
+  (when (derived-mode-p 'python-mode) (my-python-mode-hook)))
+
+(add-hook 'hack-local-variables-hook #'my-local-vars-hook)
 
 (which-function-mode 1)
