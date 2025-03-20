@@ -1,16 +1,17 @@
-;;; .emacs -- initialization file for GNU Emacs 24, may work for 22+.
+;;; .emacs -- initialization file for GNU Emacs 29, may work for older versions
 
 ;; top-level vars, and frame look-n-feel
 (setq inhibit-startup-message t
       find-file-existing-other-name t
       delete-auto-save-files t
-      default-fill-column 80
+      default-fill-column 90
       dired-listing-switches "-alg"
       inhibit-read-only nil
       mouse-yank-at-point t
       password-cache-expiry nil
 	  vr:venv-root nil
       )
+;; vertical scroll bar
 (scroll-bar-mode)
 (menu-bar-mode)
 (tool-bar-mode -1)
@@ -19,9 +20,11 @@
         (height . 57)
         ))
 
+;; TODO - how to do spelling? Why to do it?
 (autoload 'ispell-region "flyspell" "spell checking as you go" t)
 
 ;; configure package manager
+;; TODO: how to keep it up to date?
 (require 'package)
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
                          ("org" . "https://orgmode.org/elpa/")
@@ -36,6 +39,7 @@
 (setq use-package-always-ensure t)
 
 ;; more vars and defuns from 1993+
+;; disable the "normal" marking
 (transient-mark-mode 0)
 ;; set this if there are custom elisp files
 ;;(setq load-path (cons (expand-file-name "~/elisp") load-path))
@@ -98,14 +102,16 @@
 (global-set-key (kbd "C-c h") 'help-command)
 (define-key esc-map "@" 'set-mark-command)
 (define-key Buffer-menu-mode-map " " 'Buffer-menu-select)
-(define-key ctl-x-map "\^b" 'buffer-menu)
+(global-set-key (kbd "C-x C-b") 'buffer-menu)
+;; M-C-s is also mapped to this. One needs to be mapped to not query?
 (define-key esc-map "s" 'query-replace-regexp)
 ;; (define-key esc-map "z" 'my-compile-command)
-(define-key esc-map " " 'delete-horizontal-space)
+;; taken over by X/gnome
+;; (define-key esc-map " " 'delete-horizontal-space)
 (define-key esc-map "$" 'ispell-word)
 (define-key esc-map "#" 'ispell-region)
 (define-key ctl-x-map "\\" 'just-one-space)
-(define-key ctl-x-map "\n" 'goto-line)
+;; (define-key ctl-x-map "\n" 'goto-line)
 (define-key global-map "\^y" 'yank)
 (define-key global-map "\M-y" 'yank-pop)
 (define-key global-map "\^l" 'recenter)
@@ -134,7 +140,7 @@
 ;; the latter by accident sometimes.)
 (define-key global-map [(control x) return] nil)
 ;; scroll more on mouse
-(setq mouse-wheel-scroll-amount-horizontal 4)
+(setq mouse-wheel-scroll-amount-horizontal 1)
 
 ;;; packages
 (use-package ivy
@@ -142,11 +148,11 @@
   :config
   (ivy-mode 1))
 
+(require 'which-func)
 (use-package idomenu
   :config
   (global-set-key (kbd "C-c f") 'idomenu))
 
-(require 'which-func)
 (require 'imenu)
 
 ;; use-package didn't work, had to install via packages-list from elpa. melpa is old?
@@ -185,7 +191,7 @@
   :bind-keymap
   ("C-c @ p" . projectile-command-map)
   :init
-   (setq projectile-project-search-path '("~/dev/leankloud"))
+   (setq projectile-project-search-path (list "~/dev/leankloud" '("~/dev/mb" . 1)))
   ;;(setq projectile-switch-project-action #'projectile-dired)
   )
 
@@ -195,6 +201,40 @@
   (define-key magit-diff-mode-map (kbd "C-<tab>") nil)
   (global-set-key (kbd "C-c @ c") 'magit-status)
   )
+
+;;; rust
+(use-package rustic
+  :ensure
+  :bind (:map rustic-mode-map
+              ("M-j" . lsp-ui-imenu)
+              ("M-?" . lsp-find-references)
+              ("C-c l l" . flycheck-list-errors)
+              ("C-c l a" . lsp-execute-code-action)
+              ("C-c l r" . lsp-rename)
+              ("C-c l q" . lsp-workspace-restart)
+              ("C-c l Q" . lsp-workspace-shutdown)
+              ("C-c l s" . lsp-rust-analyzer-status)
+              ("C-c l e" . lsp-rust-analyzer-expand-macro)
+              ("C-c l d" . dap-hydra)
+              ("C-c l h" . lsp-ui-doc-glance))
+  :config
+  ;; uncomment for less flashiness
+  ;; (setq lsp-eldoc-hook nil)
+  ;; (setq lsp-enable-symbol-highlighting nil)
+  ;; (setq lsp-signature-auto-activate nil)
+
+  ;; comment to disable rustfmt on save
+  (setq rustic-format-on-save t)
+  (add-hook 'rustic-mode-hook 'rk/rustic-mode-hook))
+
+(defun rk/rustic-mode-hook ()
+  ;; so that run C-c C-c C-r works without having to confirm, but don't try to
+  ;; save rust buffers that are not file visiting. Once
+  ;; https://github.com/brotzeit/rustic/issues/253 has been resolved this should
+  ;; no longer be necessary.
+  (when buffer-file-name
+    (setq-local buffer-save-without-query t))
+  (add-hook 'before-save-hook 'lsp-format-buffer nil t))
 
 ;;; python
 ;; language-server
@@ -206,7 +246,23 @@
   :init
   (setq lsp-keymap-prefix "C-c l")
   :config
-  (lsp-enable-which-key-integration t))
+  (lsp-enable-which-key-integration t)
+  :custom
+  ;; what to use when checking on-save. "check" is default, I prefer clippy
+  (lsp-rust-analyzer-cargo-watch-command "clippy")
+  (lsp-eldoc-render-all t)
+  (lsp-idle-delay 0.6)
+  ;; This controls the overlays that display type and other hints inline. Enable
+  ;; / disable as you prefer. Well require a `lsp-workspace-restart' to have an
+  ;; effect on open projects.
+  (lsp-rust-analyzer-server-display-inlay-hints t)
+  (lsp-rust-analyzer-display-lifetime-elision-hints-enable "skip_trivial")
+  (lsp-rust-analyzer-display-chaining-hints t)
+  (lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names nil)
+  (lsp-rust-analyzer-display-closure-return-type-hints t)
+  (lsp-rust-analyzer-display-parameter-hints nil)
+  (lsp-rust-analyzer-display-reborrow-hints nil)
+  )
 
 (use-package lsp-ui
   :hook (lsp-mode . lsp-ui-mode)
@@ -258,13 +314,14 @@
 (make-face-bold 'font-lock-preprocessor-face)
 (set-face-foreground 'font-lock-variable-name-face "steelblue")
 (make-face-bold 'font-lock-variable-name-face)
-(set-face-underline-p 'font-lock-variable-name-face t)
+;;(set-face-underline-p 'font-lock-variable-name-face t)
+(set-face-underline 'font-lock-variable-name-face t)
 (set-face-foreground 'font-lock-type-face "firebrick")
 (make-face-bold 'font-lock-type-face)
 (set-face-foreground 'font-lock-constant-face "gold")
 (set-face-background 'font-lock-constant-face "grey40")
 (make-face-bold 'font-lock-constant-face)
-(set-face-underline-p 'font-lock-string-face nil)
+(set-face-underline 'font-lock-string-face nil)
 (set-face-foreground 'highlight "gold")
 (set-face-background 'highlight "royalblue")
 (set-face-foreground 'font-lock-builtin-face "darkgreen")
@@ -288,8 +345,12 @@
 	magit-libgit magit-org-todos magit-popup magit-section
 	magit-tbdiff magit-todos magit-topgit magithub))
  '(python-shell-interpreter "python3")
+ '(safe-local-variable-values
+   '((vr:venv-root . "venv")
+	 (vr:venv-root . "aws-metrics")
+	 (vr:venv-root . "intel3.9")))
  '(tab-width 4)
- '(warning-suppress-types '((comp))))
+ '(warning-suppress-types '(((undo discard-info)) (comp))))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
