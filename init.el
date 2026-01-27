@@ -140,7 +140,7 @@
 ;; the latter by accident sometimes.)
 (define-key global-map [(control x) return] nil)
 ;; scroll more on mouse
-(setq mouse-wheel-scroll-amount-horizontal 1)
+(setq mouse-wheel-scroll-amount-horizontal 4)
 
 ;;; packages
 (use-package ivy
