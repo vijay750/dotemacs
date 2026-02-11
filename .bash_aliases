@@ -1,0 +1,5 @@
+alias mv='mv -i'
+alias cp='cp -i'
+alias rm='rm -i'
+alias rrm='/bin/rm'
+alias psg='ps auxww | grep'

@@ -339,15 +339,10 @@
  '(imenu-auto-rescan t)
  '(imenu-auto-rescan-maxout 1048576)
  '(line-move-visual nil)
- '(package-selected-packages
-   (magit-annex magit-filenotify magit-find-file magit-gerrit
-	magit-gh-pulls magit-gitflow magit-imerge magit-lfs
-	magit-libgit magit-org-todos magit-popup magit-section
-	magit-tbdiff magit-todos magit-topgit magithub))
+ '(package-selected-packages nil)
  '(python-shell-interpreter "python3")
  '(safe-local-variable-values
-   '((vr:venv-root . "venv")
-	 (vr:venv-root . "aws-metrics")
+   '((vr:venv-root . "venv") (vr:venv-root . "aws-metrics")
 	 (vr:venv-root . "intel3.9")))
  '(tab-width 4)
  '(warning-suppress-types '(((undo discard-info)) (comp))))
