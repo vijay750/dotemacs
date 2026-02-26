@@ -7,9 +7,9 @@
 
 case $1/$2 in
 	pre/*)
-	modprobe -r iwlmvm iwlwifi
+	modprobe -r iwlmld iwlwifi
 	;;
 	post/*)
-	modprobe iwlmvm iwlwifi
+	modprobe iwlmld iwlwifi
 esac
 
