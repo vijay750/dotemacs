@@ -335,6 +335,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(c-basic-offset 4)
+ '(fill-column 110)
  '(gud-pdb-command-name "python3 -m pdb")
  '(imenu-auto-rescan t)
  '(imenu-auto-rescan-maxout 1048576)
@@ -342,8 +343,7 @@
  '(package-selected-packages nil)
  '(python-shell-interpreter "python3")
  '(safe-local-variable-values
-   '((vr:venv-root . "venv") (vr:venv-root . "aws-metrics")
-	 (vr:venv-root . "intel3.9")))
+   '((vr:venv-root . "venv") (vr:venv-root . "aws-metrics") (vr:venv-root . "intel3.9")))
  '(tab-width 4)
  '(warning-suppress-types '(((undo discard-info)) (comp))))
 
